@@ -129,32 +129,7 @@ def show_liked_menus():
     else:
         messagebox.showinfo("좋아요한 메뉴 목록", "좋아요한 메뉴가 없습니다.")
 
-# GUI 업데이트 함수
-# 추천 메뉴를 GUI에 업데이트합니다.
-# def update_gui(menu, recommendation_count):
-#     menu_label.config(text=f"추천 번호 {recommendation_count}: 메뉴 - {menu['name']}")
-#     image_path = menu['image']
-#     try:
-#         img = Image.open(image_path)
-#         max_width, max_height = 600, 400
-#         img_ratio = img.width / img.height
-#         if img.width > max_width or img.height > max_height:
-#             if img_ratio > 1:
-#                 new_width = max_width
-#                 new_height = int(max_width / img_ratio)
-#             else:
-#                 new_height = max_height
-#                 new_width = int(max_height * img_ratio)
-#             img = img.resize((new_width, new_height), Image.LANCZOS)  # 이미지 크기 조정
-#         img = ImageTk.PhotoImage(img)
-#         image_label.config(image=img)
-#         image_label.image = img
-#     except Exception as e:
-#         image_label.config(text="이미지를 찾을 수 없습니다.", image='')
-#         print(e)
 
-# 선호 벡터 업데이트 및 GUI 표시 함수
-# 선호 벡터를 계산하고 GUI에 업데이트합니다.
 def update_preference_vector():
     global preference_vector
     preference_vector = calculate_preference_vector(liked_menus, disliked_menus)
@@ -172,43 +147,7 @@ def update_preference_vector():
     for attr, value in zip(attributes, preference_vector_list):
         preference_vector_table += f"{attr}\t{value:.2f}\n"
 
-# 피드백 처리 함수
-# 사용자의 피드백(좋아요, 싫어요 등)을 처리하고 다음 추천을 준비합니다.
-# def process_feedback(feedback):
-#     global recommendation_count, menu, index, exclude_indices, liked_menus, disliked_menus, preference_vector, phase_count
 
-#     if feedback == 0:  # 최종 선택 버튼 클릭
-#         messagebox.showinfo("최종 선택", f"최종 선택한 메뉴: {menu['name']}")
-#         root.quit()
-#     elif feedback == 5:  # 좋아요 목록 보기 버튼 클릭
-#         show_liked_menus()
-#         return
-#     else:
-#         if feedback == 3:  # 좋아요 버튼 클릭
-#             liked_menus.append(menu)
-#         elif feedback == 1:  # 싫어요 버튼 클릭
-#             disliked_menus.append(menu)
-
-#         exclude_indices.add(index)  # 현재 메뉴를 제외 목록에 추가
-#         recommendation_count += 1
-
-#         if recommendation_count in [6, 9, 13, 16, 18, 20, 21]:  # 유사도 기반 추천 단계
-#             preference_vector = calculate_preference_vector(liked_menus, disliked_menus)
-#             recommended_menus, recommended_indices = recommend_menu(preference_vector, exclude_indices)
-#             if recommended_menus:
-#                 menu = recommended_menus[0]
-#                 index = recommended_indices[0]
-#                 update_gui(menu, recommendation_count)
-#             else:
-#                 messagebox.showinfo("알림", "추천할 메뉴가 없습니다.")
-#                 root.quit()
-#         else:  # 무작위 추천 단계
-#             get_next_menu()
-
-#         update_preference_vector()
-
-# 다음 메뉴 가져오기 함수(무작위)
-# 무작위로 다음 메뉴를 선택하여 추천합니다.
 
 #무작위로 메뉴보여주는것.
 def get_next_menu():
@@ -243,15 +182,6 @@ phase_count = 0  # 추천 단계 초기화
 ############################################################################################################
 
 @app.route('/data', methods=['GET'])
-# def get_data():
-#     # random.shuffle(data)
-#     # send_data = data[:5]
-#     # print(send_data)'
-#     send_data = []
-#     random_numbers = [random.randint(0, 255) for _ in range(5)]
-#     for i in range(5):
-#         send_data.append(menu_data[random_numbers[i]])
-#     return jsonify(send_data)
 def get_random5_menu():
     global recommendation_count, menu, index
     menu = []
@@ -262,11 +192,12 @@ def get_random5_menu():
         menu.append(menu_data[random_menu_index])
         index = random_menu_index
         exclude_indices.add(index)
-    print(exclude_indices)
-    print(menu)
-    return jsonify(menu)
+    # print(exclude_indices)
+    # print(menu)
+    print(len(menu))
+    return jsonify(menu, len(menu))
 
-@app.route('/recommendation1', methods=['POST'])
+@app.route('/recommendation1', methods=['POST']) #5개중 3개 피드백해서 추천해주고 2개 무작위로
 def get_recommendation1():
     content = request.json
     like_foods = content.get('likeFoods', [])
@@ -286,19 +217,20 @@ def get_recommendation1():
     for i in recommended_indices:
         exclude_indices.add(i)
 
-    print("recommendation1")
-    print("feedback된 메뉴개수", len(recommended_indices))
-    print("추천된 메뉴index", recommended_indices)
-    print("선택된 인덱스들",exclude_indices)
+    # print("recommendation1")
+    # print("feedback된 메뉴개수", len(recommended_indices))
+    # print("추천된 메뉴index", recommended_indices)
+    # print("선택된 인덱스들",exclude_indices)
 
-    print("지금 줄 메뉴들")
-    for i in menu:
-        print(i['name'])
+    # print("지금 줄 메뉴들")
+    # for i in menu:
+    #     print(i['name'])
+    print(len(menu))
 
-    return jsonify(menu)
+    return jsonify(menu, len(menu))
 
 
-@app.route('/recommendation2', methods=['POST'])
+@app.route('/recommendation2', methods=['POST']) #5개중 4개 피드백해서 추천해주고 1개 무작위로
 def get_recommendation2():
     content = request.json
     like_foods = content.get('likeFoods', [])
@@ -318,18 +250,19 @@ def get_recommendation2():
     for i in recommended_indices:
         exclude_indices.add(i)
 
-    print("recommendation2")
-    print("feedback된 메뉴개수", len(recommended_indices))
-    print("추천된 메뉴index", recommended_indices)
-    print("선택된 인덱스들",exclude_indices)
+    # print("recommendation2")
+    # print("feedback된 메뉴개수", len(recommended_indices))
+    # print("추천된 메뉴index", recommended_indices)
+    # print("선택된 인덱스들",exclude_indices)
 
-    print("지금 줄 메뉴들")
-    for i in menu:
-        print(i['name'])
+    # print("지금 줄 메뉴들")
+    # for i in menu:
+    #     print(i['name'])
+    print(len(menu))
 
-    return jsonify(menu)
+    return jsonify(menu, len(menu))
 
-@app.route('/recommendation3', methods=['POST'])
+@app.route('/recommendation3', methods=['POST']) #5개중 5개 모두 피드백해서 추천해주기
 def get_recommendation3():
     content = request.json
     like_foods = content.get('likeFoods', [])
@@ -342,16 +275,17 @@ def get_recommendation3():
     for i in recommended_indices:
         exclude_indices.add(i)
     
-    print("recommendation3")
-    print("feedback된 메뉴개수", len(recommended_indices))
-    print("추천된 메뉴index", recommended_indices)
-    print("선택된 인덱스들",exclude_indices)
+    # print("recommendation3")
+    # print("feedback된 메뉴개수", len(recommended_indices))
+    # print("추천된 메뉴index", recommended_indices)
+    # print("선택된 인덱스들",exclude_indices)
 
-    print("지금 줄 메뉴들")
-    for i in menu:
-        print(i['name'])
+    # print("지금 줄 메뉴들")
+    # for i in menu:
+    #     print(i['name'])
+    print(len(menu))
 
-    return jsonify(menu)
+    return jsonify(menu, len(menu))
     
 
 
